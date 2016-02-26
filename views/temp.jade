@@ -1,0 +1,44 @@
+extends layout
+
+block content
+	h1= title
+	p Welcome to #{title}
+	div(style="display:inline-block;")
+		input.account#test(value="test ~~~", placeholder="input your words")
+		input(type="radio", checked='checked')
+		select
+			option(value="{{name}}") {{name}}
+			option(value="1") 1
+			option(value="2") 2
+			option(value="3") 3
+			option(value="4") 4
+			option(value="5") 5
+		button.btn-primary.btn test
+	ul
+		li test1
+		li test2
+	ul
+		li: a test1
+		li: a test2
+	div.
+		jade
+		nesting
+	- var foo = "im a boy"
+	h1 = foo
+	div#excaping hi <i>hello</i>
+	hr
+	a.col-sm-1(href="#view1") view1
+	a.col-sm-3(href="#view2") view2
+	a.col-sm-1(href="login") login
+	hr
+	div(ng-view)
+	hr
+	span(app-versions)
+	script(src="/bower_components/angular/angular.min.js")
+	script(src="/bower_components/angular-route/angular-route.min.js")
+	script(src="/bower_components/angular-bootstrap/ui-bootstrap.min.js")
+	script(src='/javascripts/app.js')
+	script(src='/javascripts/services.js')
+	script(src='/javascripts/controllers.js')
+	script(src='/javascripts/filters.js')
+	script(src='/javascripts/directives.js')

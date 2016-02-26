@@ -1,0 +1,85 @@
+doctype html
+html(lang="en")
+head
+	meta(charset="UTF-8")
+	base(href='/')
+	title 大山中学教务系统
+	link(rel="stylesheet", href="/bower_components/angular-bootstrap/bootstrap.min.css")
+	style.
+		body{
+			background: url('/images/main_back.jpg') no-repeat;
+		}
+		#loginForm label {
+			margin-top:5px;
+		}
+		#loginForm {
+			background:#0E9BBE;
+			background: linear-gradient(left, #af55b2, #866dc0, #8EC4E9, #0E9BBE, #2e65a8);
+			background: -webkit-linear-gradient(left,#af55b2,#866dc0,#8EC4E9,#0E9BBE,#2e65a8);
+			background: -moz-linear-gradient(left, #af55b2, #866dc0, #8EC4E9, #0E9BBE, #2e65a8);
+			background: -o-linear-gradient(left, #af55b2, #866dc0, #8EC4E9, #0E9BBE, #2e65a8);
+			background: -ms-linear-gradient(left, #af55b2, #866dc0, #8EC4E9, #0E9BBE, #2e65a8);
+			border-radius: 5px;
+			padding-right:30px !important;
+			padding-top:10px !important;
+			margin-left:10%;
+			margin-top:15%;
+			box-shadow: #212121 5px 5px 5px;
+		}
+body
+	.container.row.center-block
+		form#loginForm(name="loginform" method="POST" ng-app="loginApp" ng-controller="loginCtrl" my-enter="doSubmit()" ng-init="getCaptcha='getCaptcha'").col-sm-4
+			.form-group.row
+				.text-danger.text-center(ng-bind="loginHit" style="height:20px")
+			.form-group.clearfix
+				label.col-sm-3.text-right.vertical-center 学号
+				.col-sm-9
+					input.form-control(type="text" ng-model="username" ng-required="true" name="username")
+			.form-group.clearfix
+				label.col-sm-3.text-right 密码
+				.col-sm-9
+					input.form-control(type="password" ng-model="password" ng-required="true" name="password")
+			.form-group.clearfix
+				label.col-sm-3.text-right 验证码
+				.col-sm-5
+					input.form-control(type="text" ng-model="captcha" ng-required="true" name="captcha")
+				.col-sm-4
+					img(width="100%" height="35" ng-src="{{getCaptcha}}")
+			.form-group.row.text-center
+				input.btn.btn-primary(ng-click="doSubmit()" type="button" value="登录")
+			
+
+	script(src="/bower_components/angular/angular.min.js")
+	script(src="/bower_components/angular-route/angular-route.min.js")
+	script(src="/bower_components/angular-bootstrap/ui-bootstrap.min.js")
+	script(src="/javascripts/md5.js")
+	script.
+		var app = angular.module("loginApp", []);
+		app.controller("loginCtrl", function($scope, $http) {
+			$scope.username = "13349086";
+			$scope.password = "PWQ2080064!";
+			$scope.doSubmit = function() {
+				$http.post('login', {
+					username: $scope.username,
+					password: sysu_encrypt($scope.password),
+					captcha: $scope.captcha
+				}).error(function(res) {
+					$scope.loginHit = res;
+					$scope.getCaptcha = 'getCaptcha?time=' + new Date();
+				}).success(function(res) {
+					window.location.href = window.location.href + res
+				});
+			}
+		})
+		app.directive('myEnter', function () {
+		    return function (scope, element, attrs) {
+		        element.bind("keyup", function (event) {
+		            if(event.which === 13) {
+		                scope.$apply(function (){
+		                    scope.$eval(attrs.myEnter);
+		                });
+		                event.preventDefault();
+		            }
+		        });
+		    };
+		});

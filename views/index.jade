@@ -1,0 +1,167 @@
+doctype html
+html
+	head
+		title #{student} 大山中学教务系统
+		base(href='/')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		link(rel="stylesheet", href="/bower_components/angular-bootstrap/bootstrap.min.css")
+	body(ng-app="myApp" ng-controller="myCtrl")
+		.m_header
+			.col-md-6  
+				.m_logo
+				.m_slogan.col-md-8 大山中学教务系统
+			.col-md-6#nav_options_wrap
+				ul#nav_options.nav.navbar-nav.clearfix.text-right
+					li
+						a.nav-link(href="#") 查询成绩
+					li
+						a.nav-link(href="#") 课表
+					li
+						a.nav-link(href="#") 选课
+					li
+						a.nav-link(href="/index/logout") 注销
+		.container.center-block
+			.header
+				form#select_opts_form
+					.form-group.clearfix.row
+						.col-sm-4.row
+							label.col-sm-3.text-center 学年
+							.col-sm-8
+								select#xn(name="xn" ng-init="sysu.xn='2015-2016'" ng-model="sysu.xn").col-sm-8.form-control
+									each xn in xnList
+										option(value="#{xn}") #{xn}
+						.col-sm-4
+							label.col-sm-3.text-center 学期
+							.col-sm-8
+								select#xq(name="xq" ng-init="sysu.xq='1'" ng-model="sysu.xq").col-sm-8.form-control
+									option(value="1") 第一学期
+									option(value="2") 第二学期
+									option(value="3") 第三学期
+						.col-sm-4
+							label.col-sm-4.text-center 培养类别
+							.col-sm-8
+								select#pylb(name="pylb" ng-init="sysu.pylb='01'" ng-model="sysu.pylb").col-sm-8.form-control
+									option(value="01") 主修
+									option(value="03") 双专业
+									option(value="04") 双学位
+									option(value="02") 辅修
+					.form-group.clearfix.row
+						.col-sm-7.kclb
+							label.col-md-2.col-sm-4 课程类别
+							label.col-sm-2
+								input(type="checkbox" ng-model="sysu.kclb0[11]" name="kclb" ng-checked="true" ng-init="sysu.kclb0[11]='true'")
+								span.kclb_hit 专必
+							label.col-sm-2
+								input(type="checkbox" ng-model="sysu.kclb0[21]" name="kclb" ng-checked="true" ng-init="sysu.kclb0[21]='true'")
+								span.kclb_hit 专选
+							label.col-sm-2
+								input(type="checkbox" ng-model="sysu.kclb0[10]" ng-checked="true" name="kclb" ng-init="sysu.kclb0[10]='true'")
+								span.kclb_hit 公必
+							label.col-sm-2
+								input(type="checkbox" ng-model="sysu.kclb0[30]" name="kclb" ng-checked="true" ng-init="sysu.kclb0[30]='true'")
+								span.kclb_hit 公选
+					.form-group.row
+						.text-center
+							input(type="button" ng-click="query()" value="筛选" style="margin-right:30px;margin-left:30px;").btn.btn-primary
+							input(type="reset", value="重置" style="margin-right:30px;margin-left:30px;").btn.btn-primary
+			.container(ng-show="infos")
+				.row
+					table.table
+						tr
+							th 课程名称
+							th 课程类别
+							th 教师
+							th 学分
+							th 成绩
+							th 绩点
+							th 教学班排名
+						tr(ng-repeat="x in kcList")
+							td {{x.kcmc}}
+							td {{x.kclb}}
+							td {{x.jsxm}}
+							td {{x.xf}}
+							td {{x.zzcj}}
+							td {{x.jd}}
+							td {{x.jxbpm}}
+				.row
+					.col-md-4
+						.row.text-center 年度绩点
+						.row
+							table.table
+								tr
+									th 
+									th 学分
+									th 绩点
+								tr
+									td 总和
+									td {{countAll[0]}}
+									td {{countAll[1]}}
+								tr(ng-repeat="x in leftList.jd")
+									td {{x.oneColumn | MyFilter}}
+									td {{leftList.xf[$index].twoColumn}}
+									td {{x.twoColumn}}
+					.col-md-4
+						.row.text-center 全部年度绩点、学分
+						.row
+							table.table
+								tr
+									th 
+									th 学分
+									th 绩点
+								td 总和
+									td {{countAll[2]}}
+									td {{countAll[3]}}
+								tr(ng-repeat="x in midList.jd")
+									td {{x.oneColumn | MyFilter}}
+									td {{midList.xf[$index].twoColumn}}
+									td {{x.twoColumn}}
+					.col-md-4
+						.row.text-center 总绩点、学分
+						.row
+							table.table
+								tr
+									th 
+									th 总学分
+								td 总和
+									td {{countAll[4]}}
+								tr(ng-repeat="x in rightList")
+									td {{x.oneColumn}}
+									td {{x.twoColumn}}
+
+
+		script(src="/bower_components/angular/angular.min.js")
+		script(src="/bower_components/angular-bootstrap/ui-bootstrap.min.js")
+		script.
+			var app = angular.module("myApp", []);
+			app.controller("myCtrl", function($scope, $http) {
+				$scope.query = function() {
+					var temp = "";
+					for(var item in $scope.sysu.kclb0) {
+						if($scope.sysu.kclb0.hasOwnProperty(item) 
+							&& $scope.sysu.kclb0[item] == 'true') {
+							temp += "'"+item+"',";
+						}
+					}
+					temp = temp.substr(0, temp.length-1);
+					$scope.sysu.kclb = temp;
+					$http({
+						url: '/index/getInfo',
+						params: $scope.sysu,
+						method: 'get'
+					}).success(function(info) {
+						$scope.kcList = info.mainInfo;
+						$scope.rightList = info.downInfo.right;
+						$scope.midList = info.downInfo.mid;
+						$scope.leftList = info.downInfo.left;
+						$scope.countAll =  info.countAll.str.split(",");
+						$scope.infos = true;
+					}).error(function(err) {
+						console.log(err);
+					})
+				}
+			});
+			app.filter('MyFilter', function() {
+				return function(inputArray) {
+					return inputArray.substr(0, 2);
+				}
+			});
